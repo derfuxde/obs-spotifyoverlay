@@ -46,9 +46,19 @@ node server.js
 4.3 Open [http://127.0.0.1:8080](http://127.0.0.1:8080) in your browser  
 4.4 Paste your Client ID and Client Secret again and click **"Connect to Spotify"**  
 4.5 Click **"Save Settings"**  
-4.6 Copy the URL and add it to OBS as a **Browser Source**
+4.6 Copy the URL and add it to OBS as a **Browser Source** and as a **Dock**
+
+---
+
+### 5. OBS Setup
+
+5.1 Open the Dock  
+5.2 Paste your Client ID and Client Secret again and click **"Connect to Spotify"**  
+5.3 Reload the Browser Source  
 
 ---
 
 ### You're done!
 Start playing music on Spotify the overlay will update in real-time.
+
+If there is any problem just open an [Issue](https://github.com/derfuxde/obs-spotifyoverlay/issues/new)
