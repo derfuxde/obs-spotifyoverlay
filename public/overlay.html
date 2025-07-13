@@ -446,6 +446,10 @@
                         <input type="text" id="clientId" placeholder="Deine Spotify Client ID">
                     </div>
                     <div class="setting-item">
+                        <label>Client Secret:</label>
+                        <input type="text" id="clientsecret" placeholder="Deine Spotify Client Secret">
+                    </div>
+                    <div class="setting-item">
                         <label>Redirect URI:</label>
                         <input type="text" id="redirectUri" value="http://localhost:8080/callback" placeholder="http://localhost:8080/callback">
                     </div>
@@ -461,7 +465,7 @@
                     <h3>⚙️ Erweiterte Einstellungen</h3>
                     <div class="setting-item">
                         <label>Update-Intervall (ms):</label>
-                        <input type="number" id="updateInterval" value="500" min="500" max="5000">
+                        <input type="number" id="updateInterval" value="1000" min="500" max="5000">
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="autoHide">
@@ -520,6 +524,7 @@
         // Spotify API Configuration
         const SPOTIFY_CONFIG = {
             clientId: '',
+            clientsecret: '',
             redirectUri: 'http://localhost:8080/callback',
             scopes: [
                 'user-read-currently-playing',
@@ -596,6 +601,7 @@
 
             const clientId = document.getElementById('clientId').value;
             const redirectUri = document.getElementById('redirectUri').value;
+            const clientsecret = document.getElementById('clientsecret').value;
 
             if (!clientId) {
                 alert('Bitte gib deine Spotify Client ID ein!');
@@ -604,10 +610,12 @@
 
             SPOTIFY_CONFIG.clientId = clientId;
             SPOTIFY_CONFIG.redirectUri = redirectUri;
+            SPOTIFY_CONFIG.clientsecret = clientsecret;
 
             // Save config
             storeConfig('clientId', clientId);
             storeConfig('redirectUri', redirectUri);
+            storeConfig('clientsecret', clientsecret);
 
             storeConfig('auth_state', data.state);
 
@@ -629,6 +637,8 @@
         function connectSpotify() {
             const clientId = document.getElementById('clientId').value;
             const redirectUri = document.getElementById('redirectUri').value;
+            const clientsecret = document.getElementById('clientsecret').value;
+
 
             if (!clientId) {
                 alert('Bitte gib deine Spotify Client ID ein!');
@@ -637,10 +647,12 @@
 
             SPOTIFY_CONFIG.clientId = clientId;
             SPOTIFY_CONFIG.redirectUri = redirectUri;
+            SPOTIFY_CONFIG.clientsecret = clientsecret;
 
             // Save config
             storeConfig('clientId', clientId);
             storeConfig('redirectUri', redirectUri);
+            storeConfig('clientsecret', clientsecret);
 
             // Generate state for security
             const state = generateRandomString(16);
@@ -926,7 +938,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'Authorization': `Basic ${btoa(SPOTIFY_CONFIG.clientId + ':' + "3ef8eec436454258919e04ce16df0077")}`
+                        'Authorization': `Basic ${btoa(SPOTIFY_CONFIG.clientId + ':' + SPOTIFY_CONFIG.clientSecret)}`
                     },
                     body: new URLSearchParams({
                         grant_type: 'refresh_token',
@@ -984,6 +996,7 @@
 
         function loadStoredConfig() {
             const clientId = getConfig('clientId');
+            const clientsecret = getConfig('clientsecret');
             const redirectUri = getConfig('redirectUri');
             const storedAccessToken = getConfig('access_token');
             const storedRefreshToken = getConfig('refresh_token');
@@ -991,6 +1004,11 @@
             if (clientId) {
                 document.getElementById('clientId').value = clientId;
                 SPOTIFY_CONFIG.clientId = clientId;
+            }
+
+            if (clientsecret) {
+                document.getElementById('clientsecret').value = clientsecret;
+                SPOTIFY_CONFIG.clientSecret = clientsecret;
             }
             
             if (redirectUri) {
