@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Authentifizierung</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            color: #1ed760;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #1db954, #1ed760);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(29, 185, 84, 0.4);
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        .session-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #1ed760;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" style="display: none;">
+            <div class="spinner"></div>
+            <h1>Verarbeitung...</h1>
+            <p>Authentifizierung wird verarbeitet...</p>
+        </div>
+
+        <div id="success" style="display: none;">
+            <div class="icon success">✅</div>
+            <h1>Erfolgreich verbunden!</h1>
+            <p>Dein Spotify-Account wurde erfolgreich verknüpft.</p>
+            <div class="session-info">
+                <strong>Session ID:</strong><br>
+                <span id="sessionId"></span>
+            </div>
+            <button class="btn" onclick="window.close()">Fenster schließen</button>
+            <button class="btn secondary" onclick="testConnection()">Verbindung testen</button>
+        </div>
+
+        <div id="error" style="display: none;">
+            <div class="icon error">❌</div>
+            <h1>Authentifizierung fehlgeschlagen</h1>
+            <p id="errorMessage">Ein Fehler ist aufgetreten.</p>
+            <button class="btn" onclick="window.close()">Fenster schließen</button>
+            <button class="btn secondary" onclick="retry()">Erneut versuchen</button>
+        </div>
+    </div>
+
+    <script>
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const success = urlParams.get('success');
+        const error = urlParams.get('error');
+        const sessionId = urlParams.get('sessionId');
+
+        // Error messages
+        const errorMessages = {
+            'access_denied': 'Zugriff verweigert. Du hast die Berechtigung nicht erteilt.',
+            'invalid_state': 'Ungültiger Sicherheitstoken. Bitte versuche es erneut.',
+            'missing_parameters': 'Fehlende Parameter. Bitte versuche es erneut.',
+            'token_exchange_failed': 'Token-Austausch fehlgeschlagen. Bitte versuche es erneut.',
+            'default': 'Ein unbekannter Fehler ist aufgetreten.'
+        };
+
+        function showResult() {
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+
+            if (code && state) {
+                // Erfolgreich, sende code + state an Hauptfenster
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'SPOTIFY_AUTH_SUCCESS',
+                        code,
+                        state
+                    }, '*');
+                }
+
+                document.getElementById('success').style.display = 'block';
+                document.getElementById('sessionId').textContent = state;
+
+            } else if (error) {
+                document.getElementById('error').style.display = 'block';
+                const errorMessage = errorMessages[error] || errorMessages['default'];
+                document.getElementById('errorMessage').textContent = errorMessage;
+
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'SPOTIFY_AUTH_ERROR',
+                        error: error,
+                        message: errorMessage
+                    }, '*');
+                }
+            } else {
+                document.getElementById('loading').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('errorMessage').textContent = 'Keine gültigen Parameter erhalten.';
+                }, 2000);
+            }
+        }
+
+
+        async function testConnection() {
+            if (!sessionId) return;
+            
+            try {
+                const response = await fetch(`/session/${sessionId}`);
+                const data = await response.json();
+                
+                if (data.connected) {
+                    alert('✅ Verbindung erfolgreich! Du kannst das Overlay jetzt verwenden.');
+                } else {
+                    alert('❌ Verbindung fehlgeschlagen. Bitte versuche es erneut.');
+                }
+            } catch (error) {
+                alert('❌ Fehler beim Testen der Verbindung: ' + error.message);
+            }
+        }
+
+        function retry() {
+            window.location.href = '/';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', showResult);
+
+        // Auto-close after 10 seconds if successful
+        if (success === 'true') {
+            setTimeout(() => {
+                if (window.opener) {
+                    window.close();
+                }
+            }, 10000);
+        }
+    </script>
+</body>
+</html>
