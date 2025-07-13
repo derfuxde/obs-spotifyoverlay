@@ -1,2 +1,1 @@
-# obs-spotifyoverlay
-an overlay for spotify
+# Show your viewers what your listening to
