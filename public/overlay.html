@@ -451,7 +451,7 @@
                     </div>
                     <div class="setting-item">
                         <label>Redirect URI:</label>
-                        <input type="text" id="redirectUri" value="http://localhost:8080/callback" placeholder="http://localhost:8080/callback">
+                        <input type="text" id="redirectUri" value="http://127.0.0.1:8080/callback" placeholder="http://127.0.0.1:8080/callback">
                     </div>
                     <div class="spotify-connection">
                         <button class="btn" id="connectSpotify" onclick="requestSpotifyAuthLink()">🎵 Mit Spotify verbinden</button>
@@ -525,7 +525,7 @@
         const SPOTIFY_CONFIG = {
             clientId: '',
             clientsecret: '',
-            redirectUri: 'http://localhost:8080/callback',
+            redirectUri: 'http://127.0.0.1:8080/callback',
             scopes: [
                 'user-read-currently-playing',
                 'user-read-playback-state',
@@ -596,7 +596,7 @@
         spotifyApi = new SpotifyAPI();
 
         async function requestSpotifyAuthLink() {
-            const res = await fetch('http://localhost:8080/auth/spotify');
+            const res = await fetch('http://127.0.0.1:8080/auth/spotify');
             const data = await res.json();
 
             const clientId = document.getElementById('clientId').value;
@@ -701,7 +701,7 @@
 
         async function exchangeCodeForTokens(code,state) {
             try {
-                const response = await fetch('http://192.168.56.1:8080/auth/spotify/callback', {
+                const response = await fetch('http://127.0.0.1:8080/auth/spotify/callback', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
