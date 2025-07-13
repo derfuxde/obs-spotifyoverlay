@@ -18,7 +18,7 @@ app.use(express.static('public'));
 const SPOTIFY_CONFIG = {
     clientId: process.env.SPOTIFY_CLIENT_ID,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-    redirectUri: process.env.SPOTIFY_REDIRECT_URI || 'http://192.168.56.1:8080/callback',
+    redirectUri: process.env.SPOTIFY_REDIRECT_URI || 'http://127.0.0.1:8080/callback',
     scopes: [
         'user-read-currently-playing',
         'user-read-playback-state',
@@ -418,8 +418,8 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, () => {
     console.log(`🎵 Spotify Backend Server läuft auf Port ${PORT}`);
-    console.log(`🔗 Callback URL: http://localhost:${PORT}/callback`);
-    console.log(`🌐 Frontend URL: http://localhost:${PORT}`);
+    console.log(`🔗 Callback URL: http://127.0.0.1:${PORT}/callback`);
+    console.log(`🌐 Frontend URL: http://127.0.0.1:${PORT}`);
     
     if (!SPOTIFY_CONFIG.clientId || !SPOTIFY_CONFIG.clientSecret) {
         console.warn('⚠️  WARNUNG: Spotify Client ID oder Client Secret nicht konfiguriert!');
