@@ -15,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #1a1a1a;
             color: #fff;
-            /*overflow: hidden;*/
+            overflow-x: hidden;
         }
 
         .container {
@@ -65,13 +65,38 @@
             padding: 25px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-
         
+
 
         .settings-card h3 {
             color: #1ed760;
             margin-bottom: 20px;
             font-size: 1.3rem;
+        }
+
+        .block {
+            background: rgb(255 0 0 / 10%);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: 100%;
+            width: 100%;
+            transform: translate(-25px, -25px);
+            z-index: 1000;
+            position: fixed;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+        .block h3{
+            color: red;
+            font-size: 2rem;
+            text-align: center;
+            margin-top: 50%;
+            transform: translateY(50%);
+            text-shadow: #ac000093 -3px 2px;
         }
 
         .setting-item {
@@ -176,12 +201,15 @@
 
         /* Overlay Player */
         .overlay-page {
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             width: 100vw;
             height: 100vh;
             position: relative;
+            opacity: 100%;
+            transition: opacity 0.5s ease;
+            pointer-events: auto; /* Normal interaktiv */
         }
 
 
@@ -289,6 +317,11 @@
             word-break: break-word;     /* bei langen Wörtern umbrechen */
         }
 
+        .closebtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(29, 185, 84, 0.4);
+        }
+
 
         .song-artist {
             font-size: 1.0rem;
@@ -366,19 +399,20 @@
 <body>
     <div class="container">
         <button class="toggle-view" onclick="toggleView()">
-            <span id="toggle-text">Zu Overlay wechseln</span>
+            <span id="toggle-text">Switch to Overlay</span>
         </button>
 
         <!-- Einstellungsseite -->
         <div class="settings-page active" id="settings-page">
             <div class="settings-header">
                 <h1>🎵 Spotify OBS Overlay</h1>
-                <p>Konfiguriere dein Spotify Overlay für OBS</p>
+                <p>Configure your Spotify overlay for OBS</p>
             </div>
+
             
             <div class="settings-grid">
                 <div class="settings-card">
-                    <h3>📍 Position & Größe</h3>
+                    <h3>📍 Position & Size</h3>
                     <div class="setting-item">
                         <label>X-Position (px):</label>
                         <input type="number" id="posX" value="50" min="0">
@@ -388,11 +422,11 @@
                         <input type="number" id="posY" value="50" min="0">
                     </div>
                     <div class="setting-item">
-                        <label>Overlay-Breite (px):</label>
+                        <label>Overlay-width (px):</label>
                         <input type="number" id="width" value="500" min="200" max="800">
                     </div>
                     <div class="setting-item">
-                        <label>Overlay-Höhe (px):</label>
+                        <label>Overlay-height (px):</label>
                         <input type="number" id="height" value="200" min="100" max="400">
                     </div>
                 </div>
@@ -401,84 +435,89 @@
                     <h3>🎶 Anzeigeelemente</h3>
                     <div class="checkbox-item">
                         <input type="checkbox" id="showSongName" checked>
-                        <label for="showSongName">Song-Titel anzeigen</label>
+                        <label for="showSongName">Show song title</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="showArtist" checked>
-                        <label for="showArtist">Künstler anzeigen</label>
+                        <label for="showArtist">Show Artist</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="showTimeline" checked>
-                        <label for="showTimeline">Timeline anzeigen</label>
+                        <label for="showTimeline">Show Timeline</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="showAlbumArt" checked>
-                        <label for="showAlbumArt">Album-Cover anzeigen</label>
+                        <label for="showAlbumArt">Show Album-Cover</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="showLyrics" checked>
+                        <label for="ShowLyrics">Show Lyrics</label>
                     </div>
                 </div>
 
                 <div class="settings-card">
                     <h3>🎨 Design</h3>
                     <div class="setting-item">
-                        <label>Hintergrund-Transparenz:</label>
+                        <label>Background transparency:</label>
                         <input type="range" id="bgOpacity" min="0" max="100" value="90">
                         <span id="opacityValue">90%</span>
                     </div>
-                    <div class="setting-item">
+                    <div class="setting-item" style="display: none;">
                         <label>Ecken-Rundung (px):</label>
                         <input type="number" id="borderRadius" value="20" min="0" max="50">
                     </div>
                     <div class="setting-item">
-                        <label>Schriftgröße Titel:</label>
+                        <label>Frontsize Titel:</label>
                         <select id="titleSize">
-                            <option value="1.0rem">Klein</option>
-                            <option value="1.2rem">Mittel</option>
-                            <option value="1.5rem" selected>Groß</option>
-                            <option value="1.8rem">Sehr groß</option>
+                            <option style="color: #000000;" value="1.0rem">Small</option>
+                            <option style="color: #000000;" value="1.2rem">Medium</option>
+                            <option style="color: #000000;" value="1.5rem" selected>Large</option>
+                            <option style="color: #000000;" value="1.8rem">Extra Large</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="settings-card">
-                    <h3>🎵 Spotify Verbindung</h3>
+                    <h3>🎵 Spotify connection</h3>
                     <div class="setting-item">
                         <label>Client ID:</label>
-                        <input type="text" id="clientId" placeholder="Deine Spotify Client ID">
+                        <input type="text" id="clientId" placeholder="Your Spotify Client ID">
                     </div>
                     <div class="setting-item">
                         <label>Client Secret:</label>
-                        <input type="text" id="clientsecret" placeholder="Deine Spotify Client Secret">
+                        <input type="text" id="clientsecret" placeholder="Your Spotify Client Secret">
                     </div>
                     <div class="setting-item">
                         <label>Redirect URI:</label>
                         <input type="text" id="redirectUri" value="http://127.0.0.1:8080/callback" placeholder="http://127.0.0.1:8080/callback">
                     </div>
                     <div class="spotify-connection">
-                        <button class="btn" id="connectSpotify" onclick="requestSpotifyAuthLink()">🎵 Mit Spotify verbinden</button>
+                        <button class="btn" id="connectSpotify" onclick="requestSpotifyAuthLink()">🎵 Connect to Spotify</button>
                         <div class="connection-status" id="connectionStatus">
-                            <span class="status-text">Nicht verbunden</span>
+                            <span class="status-text">Disconnected</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="settings-card">
-                    <h3>⚙️ Erweiterte Einstellungen</h3>
+                    <div id="blocked" class="block"> <h3>Blocked</h3> </div>
+                    <h3>⚙️ Advanced Settings</h3>
                     <div class="setting-item">
-                        <label>Update-Intervall (ms):</label>
+                        <label>Update-Interval (ms):</label>
                         <input type="number" id="updateInterval" value="1000" min="500" max="5000">
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="autoHide">
-                        <label for="autoHide">Automatisch ausblenden wenn pausiert</label>
+                        <label for="autoHide">Auto-Hide when paused</label>
                     </div>
                     <div class="checkbox-item">
                         <input type="checkbox" id="showAnimation" checked>
-                        <label for="showAnimation">Animationen aktivieren</label>
+                        <label for="showAnimation">Enable Animations</label>
                     </div>
                 </div>
             </div>
 
-            <button class="btn" onclick="applySettings()">Einstellungen anwenden</button>
+            <button class="btn" onclick="applySettings()">Save Settings</button>
         </div>
 
         <!-- Overlay Seite -->
@@ -520,6 +559,10 @@
         let updateTimer = null;
         let isPlaying = false;
         let currentTrack = null;
+
+        const overridedlyrics = {
+        };
+
 
         // Spotify API Configuration
         const SPOTIFY_CONFIG = {
@@ -596,7 +639,8 @@
         spotifyApi = new SpotifyAPI();
 
         async function requestSpotifyAuthLink() {
-            const res = await fetch('http://127.0.0.1:8080/auth/spotify');
+            const redirecturi = document.getElementById('redirectUri').value.replace('/callback', "");
+            const res = await fetch(redirecturi + '/auth/spotify');
             const data = await res.json();
 
             const clientId = document.getElementById('clientId').value;
@@ -604,7 +648,7 @@
             const clientsecret = document.getElementById('clientsecret').value;
 
             if (!clientId) {
-                alert('Bitte gib deine Spotify Client ID ein!');
+                alert('Please enter a client id!');
                 return;
             }
 
@@ -623,12 +667,12 @@
                 const popup = window.open(data.authUrl, '_blank');
                 console.log("jaja")
                 if (!popup) {
-                    updateConnectionStatus('Fenster konnte nicht geöffnet werden.', 'error');
+                    updateConnectionStatus('Window could not be opened.', 'error');
                 }
 
                 window.addEventListener('message', handleAuthMessage);
             } else {
-                console.error("Fehler beim Holen des Auth-Links:", data);
+                console.error("Error fetching auth URL:", data);
             }
         }
 
@@ -688,14 +732,14 @@
                 // Verify state
                 const storedState = getConfig('auth_state');
                 if (state !== storedState) {
-                    updateConnectionStatus('Authentifizierung fehlgeschlagen: Ungültiger State', 'error');
+                    updateConnectionStatus('Authentication fehlgeschlagen: Invalid State', 'error');
                     return;
                 }
 
                 // Exchange code for tokens
                 exchangeCodeForTokens(code, state);
             } else if (event.data.type === 'SPOTIFY_AUTH_ERROR') {
-                updateConnectionStatus('Authentifizierung fehlgeschlagen', 'error');
+                updateConnectionStatus('Authentication failed', 'error');
             }
         }
 
@@ -723,12 +767,12 @@
                 storeConfig('access_token', accessToken);
                 storeConfig('refresh_token', refreshToken);
                 
-                updateConnectionStatus('Erfolgreich verbunden!', 'connected');
+                updateConnectionStatus('Succsessfully connected!', 'connected');
                 startSpotifyUpdates();
                 
             } catch (error) {
                 console.error('Error exchanging code for tokens:', error);
-                updateConnectionStatus('Token-Austausch fehlgeschlagen', 'error');
+                updateConnectionStatus('Token-exchange failed', 'error');
             }
         }
 
@@ -777,6 +821,10 @@
             }
         }
 
+        let currentsong = null;
+
+        let firstupadte = false;
+
         function updateTrackDisplay(track) {
             const lyricsbox = document.getElementById('lyrics-box');
             const player = document.getElementById('spotify-player');
@@ -819,8 +867,13 @@
                 lyricsbox.classList.remove('demo-song');
                 player.classList.remove('demo-song');
             }
-
-            fetchLyrics(track);
+            
+            if (currentsong !== track.name) {
+                fetchLyrics(track);
+            }else {
+                startSync(track);
+            }
+                 
         }
 
         function formatTime(ms) {
@@ -833,25 +886,50 @@
 
         let lyricsBox = document.getElementById('lyrics-box');
 
+        const overridedname = {
+            "DEUTSCHLAND 🇩🇪 (MIT IKKIMEL)": "Deutschland"
+        }
+
+        const overridedartist = {
+            "Skybase": "Standart Skill"
+        }
 
         async function fetchLyrics(track) {
             try {
-                const res = await fetch(`https://lrclib.net/api/get?artist_name=${encodeURIComponent(track.artist)}&track_name=${encodeURIComponent(track.name)}`);
+                const res = await fetch(`https://lrclib.net/api/get?artist_name=${encodeURIComponent(overridedartist[track.name] ? overridedartist[track.name] : track.artist)}&track_name=${encodeURIComponent(overridedname[track.name] ? overridedname[track.name] : track.name)}`);
                 const data = await res.json();
+                const player = document.getElementById('spotify-player');
+
 
                 if (!data.syncedLyrics) {
                     lyricsBox.style.display = "none";
+                    player.style.borderRadius = "20px";
                     return;
                 }
 
                 lyricsBox.style.display = "block";
+                player.style.borderRadius = "0px";
+                player.style.borderTopLeftRadius = "20px";
+                player.style.borderTopRightRadius = "20px";
 
-                lrcLines = parseLRC(data.syncedLyrics);
+                
+
+                if (overridedlyrics[track.name]) {
+                    console.log("⚠️ Using overridden lyrics for", track.name);
+                    lrcLines = parseLRC(overridedlyrics[track.name].join("\n"));
+                }else {
+                    console.log("ℹ️ Using lyrics for", track.name + " by " + track.artist + " with link " + `https://lrclib.net/api/get?artist_name=${encodeURIComponent(overridedartist[track.name] ? overridedartist[track.name] : track.artist)}&track_name=${encodeURIComponent(overridedname[track.name] ? overridedname[track.name] : track.name)}` );
+                    lrcLines = parseLRC(data.syncedLyrics);
+                }
+
+                currentsong = track.name;
+
+                console.log("Lyrics fetched successfully for " + track.name + " by " + track.artist)
 
                 startSync(track);
             } catch (e) {
                 lyricsBox.style.display = "none";
-                lyricsBox.textContent = "❌ Fehler beim Abrufen der Lyrics.";
+                lyricsBox.textContent = "❌ Error while fetching lyrics.";
                 console.error(e);
             }
         }
@@ -883,7 +961,7 @@
         function startSync(track) {
             function update() {
                 const interval = parseInt(document.getElementById('updateInterval').value) || 500;
-                const currentSec = msToSecondsObject(track.progress);
+                const currentSec = msToSecondsObject(track.progress);// + 1000);
 
                 // Index der aktuellen Zeile
                 const currentIndex = lrcLines.findIndex((line, i) =>
@@ -960,7 +1038,7 @@
                 }
             } catch (error) {
                 console.error('Error refreshing access token:', error);
-                updateConnectionStatus('Token-Erneuerung fehlgeschlagen', 'error');
+                updateConnectionStatus('Token-reload failed', 'error');
             }
         }
 
@@ -1019,7 +1097,7 @@
             if (storedAccessToken) {
                 accessToken = storedAccessToken;
                 refreshToken = storedRefreshToken;
-                updateConnectionStatus('Verbunden (gespeicherte Session)', 'connected');
+                updateConnectionStatus('Connected (saved session)', 'connected');
                 startSpotifyUpdates();
             }
         }
@@ -1033,13 +1111,13 @@
             if (currentView === 'settings') {
                 settingsPage.classList.remove('active');
                 overlayPage.classList.add('active');
-                toggleText.textContent = 'Zu Einstellungen wechseln';
+                toggleText.textContent = 'Switch to Einstellungen';
                 currentView = 'overlay';
                 //startDemoAnimation();
             } else {
                 overlayPage.classList.remove('active');
                 settingsPage.classList.add('active');
-                toggleText.textContent = 'Zu Overlay wechseln';
+                toggleText.textContent = 'Switch to Overlay';
                 currentView = 'settings';
                 stopDemoAnimation();
             }
@@ -1080,6 +1158,7 @@
             const songArtist = document.getElementById('song-artist');
             const progressContainer = document.getElementById('progress-container');
             const albumArt = document.getElementById('album-art');
+            const overlayPage = document.getElementById('overlay-page');
             
             // Position & Size
             const posX = document.getElementById('posX').value;
@@ -1103,11 +1182,29 @@
             const showArtist = document.getElementById('showArtist').checked;
             const showTimeline = document.getElementById('showTimeline').checked;
             const showAlbumArt = document.getElementById('showAlbumArt').checked;
+            const showLyrics = document.getElementById('showLyrics').checked;
             
             songTitle.style.display = showSongName ? 'block' : 'none';
             songArtist.style.display = showArtist ? 'block' : 'none';
             progressContainer.style.display = showTimeline ? 'block' : 'none';
             albumArt.style.display = showAlbumArt ? 'flex' : 'none';
+            lyricsbox.style.display = showLyrics ? 'block' : 'none';
+
+            if (showLyrics) {
+                player.style.display = 'none';
+                lyricsbox.style.display = 'none';
+
+                setTimeout(() => {
+                    player.style.display = 'flex';
+                    lyricsbox.style.display = 'block';
+                }, 10);
+                player.style.borderRadius = "0px";
+                player.style.borderTopLeftRadius = "20px";
+                player.style.borderTopRightRadius = "20px";
+            }else{
+                player.style.borderRadius = "20px";
+            }
+            
             
             // Design
             const bgOpacity = document.getElementById('bgOpacity').value;
@@ -1130,6 +1227,8 @@
             
             // Update opacity display
             document.getElementById('opacityValue').textContent = bgOpacity + '%';
+
+            overlayPage.classList.add('active');
             
             // Restart Spotify updates with new interval
             if (accessToken) {
@@ -1197,6 +1296,20 @@
         });
 
         //applySettings();
+
+        function checkOBS() {
+            const popup = window.open("http://127.0.0.1:8080/check.html", '_blank', 'width=400,height=300');
+            console.log("checking...");
+
+            if (!popup) {
+                toggleView(); // Popup wurde blockiert
+                alert("Please activate Popups for this page.");
+                applySettings();
+                return;
+            }
+        }
+
+        checkOBS();
     </script>
 </body>
 </html>
